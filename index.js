@@ -85,6 +85,10 @@ app.get("/health", (req, res) => {
 	res.send("api server is good health");
 })
 
+app.get("/",(req, res) => {
+	res.send("Home route of this api");
+})
+
 const PORT = process.env.PORT || 3000
 app.listen(PORT, () => {
 	console.log(`Image server running on Port:${PORT}`)
