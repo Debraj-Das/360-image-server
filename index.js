@@ -42,7 +42,7 @@ const cld = new Cloudinary({
 // Define the route to handle the image requests with optiona transformations
 app.get("/images/:productId/:skuCode/:imageNo", async (req, res) => {
 	const { productId, skuCode, imageNo } = req.params
-	const { w, h, c, q } = req.query // Destructure query params (w: width, h: height, c: crop, q: quality)
+	const { w, h, c, q, watermark } = req.query // Destructure query params (w: width, h: height, c: crop, q: quality, watermark: true/false)
 
 	try {
 		const publicId = await getPublicIdFromDb(productId, skuCode, imageNo)
@@ -71,8 +71,19 @@ app.get("/images/:productId/:skuCode/:imageNo", async (req, res) => {
 		// Always apply smart format and quality settings for optimization
 		image = image.format("auto").quality("auto")
 
-		// Generate the final URL
-		const imageUrl = image.toURL()
+		// Generate the URL and conditionally add watermark
+		let imageUrl = image.toURL()
+		
+		// Only add watermark if watermark parameter is 'true'
+		if (watermark === 'true') {
+			// Add watermark parameters to the URL (insert before the image public_id)
+			// Format: /l_watermark_public_id,g_south_east,x_10,y_10,w_100/
+			const watermarkParams = "l_tendrilsio_logo_qnpef1,g_south_east,x_10,y_10,w_100"
+			const urlParts = imageUrl.split('/upload/')
+			if (urlParts.length === 2) {
+				imageUrl = `${urlParts[0]}/upload/${watermarkParams}/${urlParts[1]}`
+			}
+		}
 
 		res.redirect(302, imageUrl)
 	} catch (error) {
