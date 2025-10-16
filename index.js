@@ -45,15 +45,18 @@ app.get("/images/:productId/:skuCode/:imageNo", async (req, res) => {
 	let { productId, skuCode, imageNo } = req.params
 	const { w, h, c, q, watermark } = req.query // Destructure query params (w: width, h: height, c: crop, q: quality, watermark: true/false)
 
-	productId = "5451133059240"
-	skuCode = "32004-cinnamon-brown"
-
 
 	try {
-		const publicId = await getPublicIdFromDb(productId, skuCode, imageNo)
+		let publicId = await getPublicIdFromDb(productId, skuCode, imageNo)
 
 		if (!publicId) {
-			return res.status(404).send("Image not found")
+				productId = "7164522233995"
+				skuCode = "bison-black"
+				publicId = await getPublicIdFromDb(productId, skuCode, imageNo)
+
+				if (!publicId) {
+					return res.status(404).send("Image not found")
+				}
 		}
 
 		// Start building the Cloudinary image object
